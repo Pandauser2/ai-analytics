@@ -40,6 +40,14 @@ TMP_SQL="$(mktemp)"
 sed \
   -e "s/{{PROJECT_ID}}/${PROJECT_ID}/g" \
   -e "s/{{DATASET}}/${DATASET}/g" \
+  ./sql/cleaning_views.sql > "${TMP_SQL}"
+echo "Creating/refreshing cleaning views..."
+bq query --use_legacy_sql=false < "${TMP_SQL}"
+
+TMP_SQL="$(mktemp)"
+sed \
+  -e "s/{{PROJECT_ID}}/${PROJECT_ID}/g" \
+  -e "s/{{DATASET}}/${DATASET}/g" \
   ./sql/kpi_views.sql > "${TMP_SQL}"
 echo "Creating/refreshing KPI views..."
 bq query --use_legacy_sql=false < "${TMP_SQL}"

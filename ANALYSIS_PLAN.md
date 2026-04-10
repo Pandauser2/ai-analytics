@@ -41,6 +41,7 @@
   - Align on north star interpretation with current data (active-user proxy).
   - Confirm KPI scope for v1 dashboard.
 - Refine:
+  - Run cleaning layer in `sql/cleaning_views.sql` to standardize channels and add data-quality flags.
   - Use cleaned views (`dim_customers_clean`, `fct_usage_clean`) as semantic layer.
   - Split KPIs into derivable-now vs blocked-by-missing-data.
 - Execute:

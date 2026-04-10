@@ -9,7 +9,8 @@ This setup loads local CSV data into BigQuery, creates KPI views, and runs a val
 
 ## Files
 - `scripts/setup_bigquery.sh` - one-command setup and refresh
-- `sql/kpi_views.sql` - cleaned views + KPI views
+- `sql/cleaning_views.sql` - data cleaning/standardization views
+- `sql/kpi_views.sql` - KPI views built on cleaned views
 - `sql/validation_checks.sql` - validation block queries
 
 ## Setup Requirements
@@ -63,16 +64,17 @@ This will:
 2. Load:
    - `customers.csv` -> `customers_raw`
    - `intuit_usage.csv` -> `intuit_usage_raw`
-3. Create views:
+3. Create cleaning views:
    - `dim_customers_clean`
    - `fct_usage_clean`
+4. Create KPI views:
    - `kpi_signup_channel`
    - `kpi_conversion`
    - `kpi_churn`
    - `kpi_engagement_summary`
    - `kpi_feature_adoption`
    - `kpi_power_users`
-4. Run Validation Block:
+5. Run Validation Block:
    - Row counts
    - Null checks
    - Join integrity
