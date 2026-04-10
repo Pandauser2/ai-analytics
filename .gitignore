@@ -1,0 +1,24 @@
+# OS / editor noise
+.DS_Store
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Large local raw data files
+customers.csv
+intuit_usage.csv
+
+# Generic Cursor workspace noise, keep intentional project AI configs
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/skills/
+!.cursor/skills/analysis-plan/
+!.cursor/skills/analysis-plan/**
