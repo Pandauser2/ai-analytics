@@ -7,6 +7,9 @@
 - Decision this analysis will support: channel investment, onboarding priorities, and retention interventions.
 
 ## 2) Available Data
+
+Canonical raw schema reference: `schema_definition.md`.
+
 | Table                 | Grain                            | Key columns                                                                      | Notes                                                           |
 | --------------------- | -------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `customers_raw`       | 1 row per customer               | `customerid`, `signup_date`, `channel`, `first_subscription_date`, `cancel_date` | Source: `customers.csv`; supports acquisition/conversion/churn. |

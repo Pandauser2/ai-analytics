@@ -15,7 +15,7 @@ Follow the **Vibe Analysis Protocol** in order:
 - Database: `[e.g., Snowflake / BigQuery / SQL Server]`
 - Libraries: `[e.g., Polars, Plotly, Statsmodels]`
 - Timezone: all timestamps are UTC
-- Metric Dictionary: read the Metric_definition.md file
+- Metric Dictionary: read `schema_definition.md`
 
 ## Business/Product Context
 - Product context: Intuit subscription products

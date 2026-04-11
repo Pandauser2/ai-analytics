@@ -1,4 +1,4 @@
-# Metric Definition
+# Schema Definition
 
 ## Purpose
 This document defines the **canonical schema** for the raw datasets used by this project.

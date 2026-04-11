@@ -4,6 +4,7 @@ This setup loads local CSV data into BigQuery, creates KPI views, and runs a val
 
 ## Project Docs
 - Analysis plan and metric dictionary: `ANALYSIS_PLAN.md`
+- Canonical raw schema: `schema_definition.md`
 - Latest validation run status: `VALIDATION_RESULTS.md`
 
 ## Files
