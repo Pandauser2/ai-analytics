@@ -7,19 +7,13 @@
 - Decision this analysis will support: channel investment, onboarding priorities, and retention interventions.
 
 ## 2) Available Data
-
-
 | Table                 | Grain                            | Key columns                                                                      | Notes                                                           |
 | --------------------- | -------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `customers_raw`       | 1 row per customer               | `customerid`, `signup_date`, `channel`, `first_subscription_date`, `cancel_date` | Source: `customers.csv`; supports acquisition/conversion/churn. |
 | `intuit_usage_raw`    | customer x action_type aggregate | `CUSTOMERID`, `action_type_id`, `total_usage`                                    | Source: `intuit_usage.csv`; no event timestamp in current file. |
 | `dim_customers_clean` | 1 row per customer               | `customerid`, `signup_date`, `channel`, `first_subscription_date`, `cancel_date` | Clean view from `customers_raw`.                                |
 | `fct_usage_clean`     | customer x action_type aggregate | `customerid`, `action_type_id`, `total_usage`                                    | Clean view from `intuit_usage_raw`.                             |
-
-
 ## 3) Metric Dictionary
-
-
 | Metric                        | Business definition                         | Formula                                                                                                                                                                        | Table(s)                                 | Column(s)                                              | Grain                                     | Caveats                                           |
 | ----------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------- |
 | New signups                   | New acquired customers                      | `COUNT(DISTINCT customerid)`                                                                                                                                                   | `dim_customers_clean`                    | `customerid`                                           | Snapshot / period filter on `signup_date` | Period requires explicit filter in BI.            |
@@ -33,8 +27,6 @@
 | Avg usage per active user     | Average usage among active users            | `AVG(IF(total_usage > 0, total_usage, NULL))`                                                                                                                                  | `fct_usage_clean`                        | `total_usage`                                          | Snapshot                                  | Sensitive to outliers.                            |
 | Feature adoption rate         | Share of customers using each action type   | `COUNT(DISTINCT IF(total_usage > 0, customerid, NULL)) by action_type_id / total customers`                                                                                    | `fct_usage_clean`, `dim_customers_clean` | `action_type_id`, `total_usage`, `customerid`          | Action type                               | Action labels need mapping from IDs.              |
 | Power user rate               | Share of users above p75 usage threshold    | `COUNT(DISTINCT IF(total_usage_sum >= p75, customerid, NULL)) / COUNT(DISTINCT customerid)`                                                                                    | `fct_usage_clean`                        | `customerid`, `total_usage`                            | Snapshot                                  | Threshold based on current dataset distribution.  |
-
-
 ## 4) Analysis Plan (Plan -> Refine -> Execute -> Validate)
 
 - Plan:
@@ -54,8 +46,6 @@
   - Mark PASS/FAIL and rerun if failed.
 
 ## 5) Validation Block
-
-
 | Check                   | Logic                                                                                            | Pass criteria                                                    | Status                     |
 | ----------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | -------------------------- |
 | Row counts              | Compare row volume of `customers_raw` and `intuit_usage_raw` after load                          | Non-zero and consistent with source file expectations            | Pending latest run capture |
@@ -64,8 +54,6 @@
 | Join integrity          | Distinct usage keys matched to customer keys; unmatched key rate                                 | Unmatched rate near 0 or understood/documented                   | Pending latest run capture |
 | Reconciliation          | Sum of channel shares should be approximately 1.0                                                | `ABS(1 - SUM(signup_share)) < 0.001`                             | Pending latest run capture |
 | Range sanity            | Rates in `[0,1]` for conversion/churn/adoption/power user                                        | No rate outside `[0,1]`                                          | Pending latest run capture |
-
-
 ## 6) Iteration and Refinement
 
 - What to review with stakeholders:

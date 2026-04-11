@@ -5,7 +5,6 @@ This setup loads local CSV data into BigQuery, creates KPI views, and runs a val
 ## Project Docs
 - Analysis plan and metric dictionary: `ANALYSIS_PLAN.md`
 - Latest validation run status: `VALIDATION_RESULTS.md`
-- Looker setup and operations checklist: `LOOKER_EXECUTION_CHECKLIST.md`
 
 ## Files
 - `scripts/setup_bigquery.sh` - one-command setup and refresh

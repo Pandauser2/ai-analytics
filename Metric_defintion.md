@@ -1,29 +1,44 @@
 # Metric Definition
 
 ## Purpose
-This document defines the core fields available for analysis and how to interpret them for business reporting.
+This document defines the **canonical schema** for the raw datasets used by this project.
 
-## Customer Dataset
+Important: the physical `customers.csv` header row may include long prefixed column names, but the **logical schema is exactly the 5 fields below**, in this order. This matches how the file is loaded into BigQuery in `scripts/setup_bigquery.sh`.
 
-| Field | Definition | Notes |
-|---|---|---|
-| `CustomerID` | Unique identifier per customer. | Primary key at customer level. |
-| `Product_Name` | Product the customer signed up for. | Use for product segmentation when available. |
-| `Signup_Date` | Date customer signed up. | Acquisition cohort anchor date. |
-| `Channel` | Marketing channel that drove signup. | Example: PPC, SEO, Direct, Sales. |
-| `First_Activation_Date` | First date customer activated in product. | Engagement milestone. |
-| `First_Purchase_Date` | First date customer purchased/subscribed. | Conversion milestone. |
-| `Cancel_Date` | Date customer canceled subscription. | May be null or not applicable for non-subscription products. |
+## Raw file: `customers.csv`
 
-## Usage Dataset
+### Canonical columns (logical schema)
+| Column | Type (loaded) | Definition | Notes |
+|---|---|---|---|
+| `customerid` | INT64 | Unique customer identifier. | Primary key at customer grain (1 row per customer). |
+| `signup_date` | DATE | Date the customer signed up. | Acquisition cohort anchor date. |
+| `channel` | STRING | Marketing acquisition channel. | Examples observed include `PPC`, `Direct`, `SEO`, `Sales`, `Other`. |
+| `first_subscription_date` | DATE | First subscription date for the customer. | Used as the conversion milestone in KPI logic. |
+| `cancel_date` | DATE | Cancellation date for the customer. | May be empty/null if not canceled. |
 
-| Field | Definition | Notes |
-|---|---|---|
-| `CustomerID` | Unique identifier per customer. | Join key to customer dataset. |
-| `Product_name` | Product used by the customer. | Product context for usage behavior. |
-| `Event_Date` | Date of usage action. | Needed for WAU/MAU and retention trends. |
-| `Action_type_id` | Action or feature type used in product. | Map IDs to meaningful action labels for reporting. |
-| `Usage_count` | Number of times the action occurred for that customer/date. | Aggregation unit for usage intensity. |
+### BigQuery table after load: `customers_raw`
+`customers.csv` is loaded into `customers_raw` using the canonical column names above (see `scripts/setup_bigquery.sh`).
+
+**Not present in this raw customer file (do not assume):** `Product_Name`, `First_Activation_Date`, `First_Purchase_Date`.
+
+## Raw file: `intuit_usage.csv`
+
+### Canonical columns (logical schema)
+| Column | Type (loaded) | Definition | Notes |
+|---|---|---|---|
+| `CUSTOMERID` | INT64 | Customer identifier. | Join key to `customers_raw.customerid`. |
+| `action_type_id` | INT64 | Encoded action/feature identifier. | Requires a business mapping table for human-readable labels. |
+| `total_usage` | INT64 | Total usage count for that customer and action type. | This file is **aggregated** (no per-day grain in the header). |
+
+### BigQuery table after load: `intuit_usage_raw`
+`intuit_usage.csv` is loaded into `intuit_usage_raw` using the same canonical column names above (see `scripts/setup_bigquery.sh`).
+
+**Not present in this raw usage file (do not assume):** `Product_name`, `Event_Date`, `Usage_count`.
+
+## Modeled views (downstream of raw)
+These are created by SQL in this repo and are the preferred reporting inputs:
+- Cleaning/standardization: `dim_customers_clean`, `fct_usage_clean` (`sql/cleaning_views.sql`)
+- KPIs: `kpi_*` views (`sql/kpi_views.sql`)
 
 ## Business and Reporting Guidance
 - Clearly state any business assumptions in analysis outputs.
