@@ -5,6 +5,9 @@
 __pycache__/
 *.py[cod]
 
+# Local virtualenv (optional; created for notebook execution)
+.venv/
+
 # Local env / secrets
 .env
 .env.*

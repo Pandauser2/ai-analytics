@@ -6,6 +6,7 @@ This setup loads local CSV data into BigQuery, creates KPI views, and runs a val
 - Analysis plan and metric dictionary: `ANALYSIS_PLAN.md`
 - Canonical raw schema: `schema_definition.md`
 - Latest validation run status: `VALIDATION_RESULTS.md`
+- Core actions exploratory notebook: `notebooks/core_actions_retention_eda.ipynb`
 
 ## Files
 - `scripts/setup_bigquery.sh` - one-command setup and refresh
