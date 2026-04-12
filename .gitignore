@@ -5,6 +5,18 @@
 __pycache__/
 *.py[cod]
 
+# Jupyter
+.ipynb_checkpoints/
+
+# Local venv (use your own path / recreate with python -m venv)
+.venv/
+
+# Anaconda / Navigator stray project metadata (not part of this repo)
+anaconda_projects/
+
+# Streamlit
+.streamlit/secrets.toml
+
 # Local env / secrets
 .env
 .env.*

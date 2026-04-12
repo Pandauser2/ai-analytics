@@ -7,11 +7,41 @@ This setup loads local CSV data into BigQuery, creates KPI views, and runs a val
 - Canonical raw schema: `schema_definition.md`
 - Latest validation run status: `VALIDATION_RESULTS.md`
 
+## Streamlit North Star dashboard (BigQuery)
+The app reads the curated view **`kpi_north_star_subscriber_detail`** (see `sql/kpi_views.sql`) built from **`dim_customers_clean`** + **`fct_usage_clean`**. Run `./scripts/setup_bigquery.sh` first so views exist.
+
+North Star definition (aligned with the view):
+
+- **Subscriber** = `first_subscription_date` present, with cleaning DQ flags applied in the view
+- **Core actions** = `action_type_id` in `{1, 3}`
+- **North Star** = share of subscribers with **both** core actions adopted (`total_usage > 0` in the cleaned fact table)
+
+**Config:** set `PROJECT_ID` and `DATASET` in the environment (same as the BigQuery setup script), or copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and set `BIGQUERY_PROJECT` / `BIGQUERY_DATASET`. You can **leave the sidebar project id blank** if `GOOGLE_CLOUD_PROJECT` is set or gcloud has a default project (`gcloud config set project …`).
+
+**Authentication (ADC):** the app uses **Application Default Credentials**, not passwords in code. On your laptop, run **`gcloud auth application-default login`** once (see [Set up ADC](https://cloud.google.com/docs/authentication/external/set-up-adc)). If Streamlit shows “default credentials were not found”, that command was never run for your user, or Streamlit is using a different OS user / environment. For production, use a **service account** and set **`GOOGLE_APPLICATION_CREDENTIALS`** to the JSON key path. The identity needs BigQuery **job create** and **data read** on the project.
+
+Install and run:
+
+```bash
+cd /Users/rajeshmukherjee/Desktop/04_Data_Science/Projects/Cursor_test_project/Analytics
+python3 -m pip install -r requirements.txt
+python3 -m streamlit run streamlit_north_star_app.py
+```
+
+Use **`python3 -m streamlit run …`** (not a bare `streamlit` on `PATH`) so Streamlit uses the same interpreter where you ran `pip install`. Alternatively run **`./scripts/run_streamlit_north_star.sh`**, which installs deps then starts Streamlit with `python3 -m streamlit`.
+
+If you see **`ImportError: cannot import name 'bigquery' from 'google.cloud'`** or the in-app “Missing the BigQuery client library” message, install into the interpreter shown in the error (`… -m pip install google-cloud-bigquery`). Cursor/IDE “Run Streamlit” buttons sometimes use a different Python than your terminal.
+
+Use the sidebar **Channel filter** to slice the subscriber universe. Charts use **Plotly**; tables/metrics use **pandas**.
+
 ## Files
 - `scripts/setup_bigquery.sh` - one-command setup and refresh
 - `sql/cleaning_views.sql` - data cleaning/standardization views
 - `sql/kpi_views.sql` - KPI views built on cleaned views
 - `sql/validation_checks.sql` - validation block queries
+- `streamlit_north_star_app.py` - Streamlit North Star dashboard (BigQuery + Plotly)
+- `scripts/run_streamlit_north_star.sh` - install deps + run app with `python3 -m streamlit`
+- `requirements.txt` - Python deps for Streamlit app
 
 ## Setup Requirements
 1. **Google Cloud project** (example: `awesome-project-1-353706`)

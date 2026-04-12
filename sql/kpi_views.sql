@@ -154,3 +154,29 @@ SELECT
 FROM user_usage u
 CROSS JOIN threshold t
 GROUP BY t.p75_usage;
+
+-- North Star (Streamlit / ad-hoc): one row per subscriber with core-action flags.
+-- Reuses dim_customers_clean + fct_usage_clean; aligns DQ filters with kpi_churn / kpi_feature_adoption.
+-- Core actions 1 and 3 are fixed here; if product changes, update this view and the app constant.
+CREATE OR REPLACE VIEW `{{PROJECT_ID}}.{{DATASET}}.kpi_north_star_subscriber_detail` AS
+WITH usage_core AS (
+  SELECT
+    customerid,
+    SUM(IF(action_type_id = 1, total_usage, 0)) AS usage_action_1,
+    SUM(IF(action_type_id = 3, total_usage, 0)) AS usage_action_3
+  FROM `{{PROJECT_ID}}.{{DATASET}}.fct_usage_clean`
+  GROUP BY customerid
+)
+SELECT
+  c.customerid,
+  c.channel,
+  c.cancel_date IS NOT NULL AS has_cancel_date,
+  COALESCE(u.usage_action_1, 0) > 0 AS adopted_action_1,
+  COALESCE(u.usage_action_3, 0) > 0 AS adopted_action_3,
+  (COALESCE(u.usage_action_1, 0) > 0 AND COALESCE(u.usage_action_3, 0) > 0) AS north_star_both_core
+FROM `{{PROJECT_ID}}.{{DATASET}}.dim_customers_clean` c
+LEFT JOIN usage_core u
+  ON c.customerid = u.customerid
+WHERE c.first_subscription_date IS NOT NULL
+  AND NOT c.dq_subscription_before_signup
+  AND NOT c.dq_cancel_before_subscription;
