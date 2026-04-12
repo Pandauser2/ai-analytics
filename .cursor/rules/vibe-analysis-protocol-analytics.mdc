@@ -11,34 +11,19 @@ Follow the **Vibe Analysis Protocol** in order:
 3. Execute
 4. Validate
 
-## Technical Stack and Environment (`/Analytics`)
-
-- **Warehouse**: Google **BigQuery** (raw loads, cleaning views, KPI views, validation SQL). Prefer SQL for large-scale transforms and official metrics; use the scripts and views under `Analytics/sql/` and `Analytics/scripts/` as the source of truth for pipeline steps.
-- **Python (notebooks & local analysis)**:
-  - **pandas** is the **default and required** API for tabular data: load, filter, join, aggregate, reshape, and QA summaries must be expressed as `DataFrame` / `Series` operations unless the user explicitly asks otherwise.
-  - Use **numpy** only for small, clear numeric tasks (e.g. `exp`, array math) where pandas is awkward; keep tabular logic in pandas.
-  - **scikit-learn** (or other libraries) may be used when they are **already present** in the environment used for this repo’s notebooks/scripts—e.g. pipelines, preprocessing, supervised models—without pulling in new stacks for the same job.
-- **Dependencies**: do **not** add new Python packages or services unless the user explicitly approves. If something is missing, call it out and suggest a minimal `requirements.txt` or install line **after** approval.
-- **Timezone**: treat timestamps as **UTC** in definitions and narrative unless a source document says otherwise.
-- **Metric dictionary**: read `schema_definition.md` before defining or recomputing metrics.
-
-## Python readability and reusability
-
-1. **Prefer pandas over row-wise Python structures** for analysis tables: avoid building large `list[dict]` or nested loops over IDs when `merge`, `groupby`, `pivot_table`, `assign`, and boolean indexing express the same logic more clearly.
-2. **Name intermediate results**: use explicit `DataFrame` variables (e.g. `subscribers`, `usage_sub`, `df_model`) and column names that match `schema_definition.md` where possible.
-3. **Reuse logic**: repeated transforms (encoding rules, subscriber universe, churn proxy) should be copied from existing SQL/views or factored into **small, pure functions** in the notebook or, if used in multiple places, a single module under `Analytics/`—only when it reduces duplication without expanding scope.
-4. **Notebook structure**: keep a consistent flow—**Load → Validation block → Analysis → Interpretation**—so others can rerun top-to-bottom.
-5. **SQL + Python**: when BigQuery already materializes a clean grain, **read that grain in pandas** for EDA rather than re-deriving keys differently in Python (avoids drift).
+## Technical Stack and Environment
+- Database: `[e.g., Snowflake / BigQuery / SQL Server]`
+- Libraries: `[e.g., Polars, Plotly, Statsmodels]`
+- Timezone: all timestamps are UTC
+- Metric Dictionary: read `schema_definition.md`
 
 ## Business/Product Context
-
 - Product context: Intuit subscription products
 - Revenue model: free trial to paid subscription
 - Product lines include tax preparation and QuickBooks payroll for SMB, plus other offerings
 - Marketing acquisition is strong; retention is a top-line metric and must be tracked explicitly
 
 ## Mandatory Analysis Rules
-
 1. **No hallucinations:** if a table, column, or metric definition is missing, stop and ask the user. Never guess.
 2. **Rigor first:** every analysis must include a **Validation Block** with:
    - source row counts (before/after filters),
@@ -48,7 +33,6 @@ Follow the **Vibe Analysis Protocol** in order:
 3. **Check assumptions:** verify statistical assumptions (for example normality, variance assumptions, or parallel trends) before reporting results.
 
 ## Example Validation Block
-
 ```text
 Validation Block
 - Row counts: raw=1,240,552; post-filter=1,102,114
